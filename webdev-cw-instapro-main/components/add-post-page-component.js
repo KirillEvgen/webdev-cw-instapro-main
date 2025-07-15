@@ -1,4 +1,5 @@
 import { renderUploadImageComponent } from "./upload-image-component.js";
+import { renderHeaderComponent } from "./header-component.js";
 
 export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
   let imageUrl = "";
@@ -19,6 +20,9 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
     `;
 
     appEl.innerHTML = appHtml;
+
+    const headerContainer = appEl.querySelector(".header-container");
+    renderHeaderComponent({ element: headerContainer });
 
     const uploadImageContainer = appEl.querySelector(".upload-image-container");
     renderUploadImageComponent({
@@ -44,6 +48,13 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
         errorEl.textContent = "Пожалуйста, введите описание.";
         return;
       }
+      // Логи для отладки
+      console.log("imageUrl:", imageUrl);
+      console.log("description:", descriptionInput.value.trim());
+      console.log("onAddPostClick будет вызван с:", {
+        description: descriptionInput.value.trim(),
+        imageUrl,
+      });
       onAddPostClick({
         description: descriptionInput.value.trim(),
         imageUrl,

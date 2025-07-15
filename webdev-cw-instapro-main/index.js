@@ -14,6 +14,7 @@ import {
   getUserFromLocalStorage,
   removeUserFromLocalStorage,
   saveUserToLocalStorage,
+  escapeHtml,
 } from "./helpers.js";
 
 export let user = getUserFromLocalStorage();
@@ -67,15 +68,13 @@ export const goToPage = (newPage, data) => {
     }
 
     if (newPage === USER_POSTS_PAGE) {
-      
       const userId = data?.userId;
       page = LOADING_PAGE;
       renderApp();
       return getPosts({ token: getToken() })
         .then((allPosts) => {
-          
           posts = allPosts.filter((post) => post.user.id === userId);
-         
+
           window.selectedUser = posts[0]?.user || null;
           page = USER_POSTS_PAGE;
           renderApp();
@@ -121,8 +120,10 @@ const renderApp = () => {
     return renderAddPostPageComponent({
       appEl,
       onAddPostClick({ description, imageUrl }) {
-       
-        addPost({ description, imageUrl, token: getToken() })
+        const safeDescription = escapeHtml(description);
+        const token = getToken();
+        console.log("TOKEN:", token);
+        addPost({ description: safeDescription, imageUrl, token })
           .then(() => {
             goToPage(POSTS_PAGE);
           })
@@ -140,7 +141,6 @@ const renderApp = () => {
   }
 
   if (page === USER_POSTS_PAGE) {
-   
     return renderPostsPageComponent({
       appEl,
       userInfo: window.selectedUser,
