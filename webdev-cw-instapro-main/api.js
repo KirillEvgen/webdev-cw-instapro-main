@@ -1,6 +1,4 @@
-// Замени на свой, чтобы получить независимый от других набор данных.
-// "боевая" версия инстапро лежит в ключе prod
-const personalKey = "prod";
+const personalKey = "kirill-instapro"; // ← Твой уникальный ключ
 const baseHost = "https://webdev-hw-api.vercel.app";
 const postsHost = `${baseHost}/api/v1/${personalKey}/instapro`;
 
@@ -15,12 +13,9 @@ export function getPosts({ token }) {
       if (response.status === 401) {
         throw new Error("Нет авторизации");
       }
-
       return response.json();
     })
-    .then((data) => {
-      return data.posts;
-    });
+    .then((data) => data.posts);
 }
 
 export function registerUser({ login, password, name, imageUrl }) {
@@ -43,10 +38,7 @@ export function registerUser({ login, password, name, imageUrl }) {
 export function loginUser({ login, password }) {
   return fetch(baseHost + "/api/user/login", {
     method: "POST",
-    body: JSON.stringify({
-      login,
-      password,
-    }),
+    body: JSON.stringify({ login, password }),
   }).then((response) => {
     if (response.status === 400) {
       throw new Error("Неверный логин или пароль");
@@ -55,38 +47,34 @@ export function loginUser({ login, password }) {
   });
 }
 
-
 export function uploadImage({ file }) {
   const data = new FormData();
   data.append("file", file);
 
-  return fetch(baseHost + "/api/upload/image", {
+  return fetch("https://webdev-hw-api.vercel.app/api/upload/image", {
     method: "POST",
     body: data,
-  }).then((response) => {
-    return response.json();
-  });
+  }).then((res) => res.json());
 }
 
 export function addPost({ description, imageUrl, token }) {
+  const body = JSON.stringify({
+    description: description || "",
+    imageUrl: imageUrl || "",
+  });
+
   return fetch(postsHost, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: token,
     },
-    body: JSON.stringify({
-      description,
-      imageUrl,
-    }),
-  }).then((response) => {
-    if (response.status === 400) {
-      throw new Error("Некорректные данные для поста");
-    }
-    if (response.status === 401) {
-      throw new Error("Нет авторизации");
-    }
-    return response.json();
+    body,
+  }).then(async (response) => {
+    const text = await response.text();
+    if (response.status === 400) throw new Error("Некорректные данные для поста");
+    if (response.status === 401) throw new Error("Нет авторизации");
+    return JSON.parse(text);
   });
 }
 
@@ -96,12 +84,7 @@ export function likePost({ postId, token }) {
     headers: {
       Authorization: token,
     },
-  }).then((response) => {
-    if (response.status === 401) {
-      throw new Error("Нет авторизации");
-    }
-    return response.json();
-  });
+  }).then((res) => res.json());
 }
 
 export function dislikePost({ postId, token }) {
@@ -110,10 +93,5 @@ export function dislikePost({ postId, token }) {
     headers: {
       Authorization: token,
     },
-  }).then((response) => {
-    if (response.status === 401) {
-      throw new Error("Нет авторизации");
-    }
-    return response.json();
-  });
+  }).then((res) => res.json());
 }
